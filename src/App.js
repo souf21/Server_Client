@@ -1,23 +1,41 @@
-import logo from './logo.svg';
+import React, { useState, useEffect } from 'react';
+import { createClient } from '@supabase/supabase-js';
+import Auth from './Auth'; 
+import Dashboard from './Dashboard'; 
 import './App.css';
+import { supabase } from './supabaseClient';
+
 
 function App() {
+  const [session, setSession] = useState(null);
+
+  useEffect(() => {
+   
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+    });
+
+    
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
   return (
     <div className="App">
       <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
+        <h1>Login Page</h1>
       </header>
+      {}
+      {!session ? (
+        <Auth />
+      ) : (
+        <Dashboard session={session} />
+      )}
     </div>
   );
 }
